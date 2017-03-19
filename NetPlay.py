@@ -26,12 +26,17 @@ playerThread = threading.Thread(target=playSong, args=(""), kwargs={})
 
 # Once a queue is formed, update page model with information on new songs. Track up/down votes.
 
+songList = glob.glob(MUSIC_DIR+"/**/*.*",recursive=True)[:]
+currentSong = ""
+
 # HTTPRequestHandler class
 class testHTTPServer_RequestHandler(BaseHTTPRequestHandler):
 	global playerThread
+	global currentSong
 	
 	# GET
 	def do_GET(self):
+		global currentSong
 		# Send response status code
 		self.send_response(200)
 
@@ -39,8 +44,8 @@ class testHTTPServer_RequestHandler(BaseHTTPRequestHandler):
 		self.send_header('Content-type','text/html')
 		self.end_headers()
 		
-		self.write("<html>")
-		self.write("<head>")
+		self.write("<html dir=\"ltr\" lang=\"he\">")
+		self.write("<head><meta charset=\"utf-8\">")
 		self.write("<title>Song loader</title>")
 		self.write("</head>")
 		self.write("<body>")
@@ -49,9 +54,22 @@ class testHTTPServer_RequestHandler(BaseHTTPRequestHandler):
 			print ("Play requested!")
 			print (self.requestline)
 			# GET /play/EVERYTHINGGOESHERE
-			self.requestSong("/".join(self.requestline.split(" ")[1].replace("%20"," ").split("/")[2:]))
+			self.findSong("/".join(self.requestline.split(" ")[1].replace("%20"," ").split("/")[2:]))
+			
+		if (self.requestline.split(" ")[1].split("/")[1] == "spec") :
+			print ("Play requested")
+			print (self.requestline)
+			# GET /play/EVERYTHINGGOESHERE
+			self.openSong("/".join(self.requestline.split(" ")[1].replace("%20"," ").split("/")[2:]))
 		
-		self.write("<p>Hello World!")
+		
+		self.write("<h1>Playing: " + currentSong + "</h1>")
+		
+		self.write("<p>")
+		for file in songList :
+			self.write("<br> - <a href=\"/spec/"+file+"\">"+ file + "</a>\n")
+			
+		self.write("</p>")
 		
 		self.write("</body>")
 		self.write("</html>")
@@ -60,8 +78,29 @@ class testHTTPServer_RequestHandler(BaseHTTPRequestHandler):
 	def write(self, text) :
 		self.wfile.write(bytes(text,"UTF-8"))
 	
-	def requestSong(self, songName) :
+	def openSong (self, songPath) :
 		global playerThread
+		global currentSong
+		
+		print("Attempting to play: " + songPath)
+		
+		if (glob.glob(songPath)) :
+			print(" Found song!")
+			if (playerThread.is_alive()) :
+				self.write("<h1>Song already playing</h1>")
+				print ("Cannot comply, song already playing")
+			else :
+				playerThread = threading.Thread(target=playSong, args=([songPath]), kwargs={})
+				playerThread.start()
+				currentSong = songPath
+				print ("Playing")
+		else :
+			print(" Could not find song!")
+	
+	def findSong(self, songName) :
+		global playerThread
+		global currentSong
+		
 		gsearch = MUSIC_DIR+'/**/*'+songName+'*.*'
 		
 		print ("Finding song for "+gsearch)
@@ -73,8 +112,9 @@ class testHTTPServer_RequestHandler(BaseHTTPRequestHandler):
 			if (playerThread.is_alive()) :
 				self.write("<h1>Song already playing.</h1>")
 			else :
-				playerThread = threading.Thread(target=playSong, args=([files[0]]), kwargs={}) 
+				playerThread = threading.Thread(target=playSong, args=([files[0]]), kwargs={})
 				print (files[0])
+				currentSong = files[0]
 				playerThread.start()
 			
 		else :
