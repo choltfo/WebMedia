@@ -34,6 +34,10 @@ class testHTTPServer_RequestHandler(BaseHTTPRequestHandler):
 	global playerThread
 	global currentSong
 	
+	
+	def write(self, text) :
+		self.wfile.write(bytes(text,"UTF-8"))
+	
 	def sendHeader(self) :
 		# Send response status code
 		self.send_response(200)
@@ -56,6 +60,7 @@ class testHTTPServer_RequestHandler(BaseHTTPRequestHandler):
 	def do_GET(self):
 		global currentSong
 		
+		# Return nothing for the favicon
 		if ("favico" in self.requestline) :
 			self.send_response(200)
 			return
@@ -87,9 +92,6 @@ class testHTTPServer_RequestHandler(BaseHTTPRequestHandler):
 		self.write("</body>")
 		self.write("</html>")
 		return
-	
-	def write(self, text) :
-		self.wfile.write(bytes(text,"UTF-8"))
 	
 	def openSong (self, songPath) :
 		global playerThread
