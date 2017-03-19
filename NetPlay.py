@@ -4,6 +4,8 @@ import winsound
 import os.path
 import glob
 
+import os
+
 import threading
 
 PORT_NUMBER = 8080
@@ -44,12 +46,12 @@ class testHTTPServer_RequestHandler(BaseHTTPRequestHandler):
 		self.send_header('Content-type','text/html')
 		self.end_headers()
 		
-		self.write("<html dir=\"ltr\" lang=\"he\">")
-		self.write("<head><meta charset=\"utf-8\">")
-		self.write("<title>Song loader</title>")
-		self.write("</head>")
-		self.write("<body>")
 		
+		Webpage_Filename = os.path.join(os.path.dirname(__file__), 'Webpage/Main.html')
+		with open(Webpage_Filename, 'r') as MainPage:
+			data=MainPage.read().replace('\n', '')
+		self.write(data)
+	
 		if (self.requestline.split(" ")[1].split("/")[1] == "play") :
 			print ("Play requested!")
 			print (self.requestline)
