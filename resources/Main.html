@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Charles' super awesome automatic DJ!</title>
+</head>
+<script type="text/javascript">
+    function addText() {
+        var AuthorValue = document.getElementById('Author');
+		var SongValue = document.getElementById('Song');
+		window.location.href = "/play/*" + Author.value + "*/*" + SongValue.value;
+    }
+</script>
+<body>
+  <h1>Charles' super awesome automatic DJ!</h1>
+  <form>
+      Author:<br>
+      <input id="Author" type="text" name="Author" value=""><br>
+      Song:<br>
+      <input id="Song" type="text" name="Song" value="Arabian Dance"><br><br>
+      <input type="reset">
+	  <input type="button" value="Submit" onclick="addText()">
+  </form>
+  
+  <br>
+  <br>
+  <br>
+  
+  
+  
+  
+<!---  </body> These are appended to the stream by the server
+</html> --->

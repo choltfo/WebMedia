@@ -34,29 +34,42 @@ class testHTTPServer_RequestHandler(BaseHTTPRequestHandler):
 	global playerThread
 	global currentSong
 	
-	# GET
-	def do_GET(self):
-		global currentSong
+	def sendHeader(self) :
 		# Send response status code
 		self.send_response(200)
-
+		
 		# Send headers
 		self.send_header('Content-type','text/html')
 		self.end_headers()
 		
-		self.write("<html dir=\"ltr\" lang=\"he\">")
-		self.write("<head><meta charset=\"utf-8\">")
-		self.write("<title>Song loader</title>")
-		self.write("</head>")
-		self.write("<body>")
+		# self.write("<html dir=\"ltr\" lang=\"he\">")
+		# self.write("<head><meta charset=\"utf-8\">")
+		# self.write("<title>Song loader</title>")
+		# self.write("</head>")
+		# self.write("<body>")
+		
+		with open('resources/Main.html', 'r') as MainPage:
+			data=MainPage.read().replace('\n', '')
+			self.write(data)
+		
+	# GET
+	def do_GET(self):
+		global currentSong
+		
+		if ("favico" in self.requestline) :
+			self.send_response(200)
+			return
+		
+		self.sendHeader()
+		
 		
 		if (self.requestline.split(" ")[1].split("/")[1] == "play") :
-			print ("Play requested!")
+			print ("Play requested")
 			print (self.requestline)
 			# GET /play/EVERYTHINGGOESHERE
 			self.findSong("/".join(self.requestline.split(" ")[1].replace("%20"," ").split("/")[2:]))
 			
-		if (self.requestline.split(" ")[1].split("/")[1] == "spec") :
+		elif (self.requestline.split(" ")[1].split("/")[1] == "spec") :
 			print ("Play requested")
 			print (self.requestline)
 			# GET /play/EVERYTHINGGOESHERE
@@ -83,6 +96,10 @@ class testHTTPServer_RequestHandler(BaseHTTPRequestHandler):
 		global currentSong
 		
 		print("Attempting to play: " + songPath)
+		songPath.replace("]","?")
+		songPath.replace("[","?")
+		songPath.replace("*","*")
+		songPath.replace("?","?")
 		
 		if (glob.glob(songPath)) :
 			print(" Found song!")
@@ -101,7 +118,7 @@ class testHTTPServer_RequestHandler(BaseHTTPRequestHandler):
 		global playerThread
 		global currentSong
 		
-		gsearch = MUSIC_DIR+'/**/*'+songName+'*.*'
+		gsearch = MUSIC_DIR+'/'+songName+'*.*'
 		
 		print ("Finding song for "+gsearch)
 		
@@ -119,6 +136,7 @@ class testHTTPServer_RequestHandler(BaseHTTPRequestHandler):
 			
 		else :
 			self.write("<h1>Could not find anything for \"" + songName+ "\"\n</h1>")
+			self.write("<p>Literal search was \"" + gsearch+ "\"\n</p>")
  
 def run():
 	print('starting server...')
